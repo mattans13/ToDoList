@@ -11,50 +11,51 @@ import android.widget.TextView;
 
 import org.w3c.dom.Text;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 
 /**
  * Created by Mattan.Shpaier on 15-Mar-15.
  */
 public class MyArrayAdapter extends ArrayAdapter {
-    Context context;
-    int layoutResourceId;
-    ArrayList<String> tasks;
-    static int location;
 
-    public MyArrayAdapter(Context context, int resource, ArrayList tasks){
-        super(context,resource,tasks);
-        this.layoutResourceId = resource;
-        this.context = context;
+    ArrayList<Task> tasks;
+
+    public MyArrayAdapter(Context context, ArrayList<Task> tasks){
+        super(context, R.layout.row_view,tasks);
         this.tasks = tasks;
-        this.location = 0;
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent){
-        View row = convertView;
-        TextHolder holder;
-        if(row == null){
-            LayoutInflater inflater = ((Activity)context).getLayoutInflater();
-            row = inflater.inflate(layoutResourceId, parent, false);
-            holder = new TextHolder();
-            holder.textView = (TextView) row.findViewById(R.id.evenRowTextView);
-            row.setTag(holder);
-        }
-        else{
-            holder = (TextHolder)row.getTag();
 
+        View rowView = convertView;
+
+        if(rowView == null){
+            LayoutInflater inflater = LayoutInflater.from(getContext());
+            rowView = inflater.inflate(R.layout.row_view, null);
         }
-        if(position % 2 == 0){
-            holder.textView.setTextColor(Color.RED);
+
+        Task task = tasks.get(position);
+
+        if(null != task){
+            TextView taskName = (TextView)rowView.findViewById(R.id.txtTodoTitle);
+            TextView taskDueDate = (TextView)rowView.findViewById(R.id.txtTodoDueDate);
+
+            if(null != taskName)
+                taskName.setText(task.getTask());
+
+            if(null != taskDueDate){
+                taskDueDate.setText(task.getDateAsString());
+                if( task.isTaskOverdue()) {
+                    taskDueDate.setTextColor(Color.RED);
+                }
+            }
         }
-        else{
-            holder.textView.setTextColor(Color.BLUE);
-        }
-        holder.textView.setText(this.tasks.get(position));
-        return row;
-    }
-    static  class TextHolder{
-        TextView textView;
+
+        return rowView;
     }
 }

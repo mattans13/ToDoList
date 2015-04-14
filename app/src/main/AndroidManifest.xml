@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="huji.ac.il.todolist" >
-
+    <uses-permission android:name="android.permission.CALL_PHONE" />
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -14,8 +14,32 @@
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
+
+                <action android:name="android.intent.action.DIAL"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:scheme="tel"/>
+
+
             </intent-filter>
+
         </activity>
+
+        <activity
+            android:name=".AddNewTodoItemActivity"
+            android:theme="@android:style/Theme.Dialog" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+        </activity>
+        <activity
+            android:name=".DialogActivity"
+            android:label="@string/title_activity_dialog" >
+
+        </activity>
+
     </application>
 
 </manifest>

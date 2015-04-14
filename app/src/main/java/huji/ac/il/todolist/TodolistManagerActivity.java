@@ -1,65 +1,108 @@
 package huji.ac.il.todolist;
 
-import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.graphics.Color;
+import android.content.Intent;
+import android.net.Uri;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
-import android.view.LayoutInflater;
+import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import java.util.ArrayList;
-
+import java.util.Calendar;
+import java.util.Date;
 
 
 public class TodolistManagerActivity extends ActionBarActivity {
-    protected ArrayList<String> _tasks;
-    protected MyArrayAdapter _adapter;
-    protected ListView _listView;
-    protected EditText _new_task;
+    protected ArrayList<Task> tasks;
+    protected MyArrayAdapter adapter;
+    protected ListView listView;
+    private final String TASK_KEY = "title";
+    private final String DATE_KEY = "dueDate";
+    private final String CALL = "call";
+    private final String CALL_CAP = "Call";
+    private final int RESULT_FROM_ADD_ITEM = 1;
+
+    final int RESULT_OK = 1;
+    final int RESULT_NOT_OK = 2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_todolist_manager);
 
-        _tasks = new ArrayList<>();
-        _adapter = new MyArrayAdapter(this, R.layout.even_row_view, _tasks);
-        _listView = (ListView)findViewById(R.id.listView);
-        _listView.setAdapter(_adapter);
-        _listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
-                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(TodolistManagerActivity.this);
-                String msg = getResources().getString(R.string.delete_prefix) + " " +  _tasks.get(position) + "?";
-                alertDialogBuilder.setMessage(msg);
-                alertDialogBuilder.setPositiveButton(R.string.ok_button, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        _tasks.remove(position);
-                        _adapter.notifyDataSetChanged();
-                    }
-                });
-                alertDialogBuilder.setNegativeButton(R.string.cancel_button, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
+        this.tasks = new ArrayList<>();
+        this.adapter = new MyArrayAdapter(this, this.tasks);
+        this.listView = (ListView)findViewById(R.id.listView);
+        this.listView.setAdapter(this.adapter);
+//        this.listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+//            @Override
+//            public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
+//                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(TodolistManagerActivity.this);
+//
+//                String msg = tasks.get(position).getTask();
+//                alertDialogBuilder.setMessage(msg);
+//                alertDialogBuilder.setPositiveButton(R.string.ok_button, new DialogInterface.OnClickListener() {
+//                    @Override
+//                    public void onClick(DialogInterface dialog, int which) {
+//                        tasks.remove(position);
+//                        adapter.notifyDataSetChanged();
+//                    }
+//                });
+//                alertDialogBuilder.setNegativeButton(R.string.cancel_button, new DialogInterface.OnClickListener() {
+//                    @Override
+//                    public void onClick(DialogInterface dialog, int which) {
+//
+//                    }
+//                });
+//                alertDialogBuilder.show();
+//                return true;
+//            }
+//        });
+        registerForContextMenu(this.listView);
+    }
 
-                    }
-                });
-                alertDialogBuilder.show();
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v,
+                                    ContextMenu.ContextMenuInfo menuInfo) {
+        this.getMenuInflater().inflate(R.menu.costume_context_menu, menu);
+        AdapterView.AdapterContextMenuInfo acmi = (AdapterView.AdapterContextMenuInfo) menuInfo;
+        final int itemPosition = acmi.position;
+        final String curTaskString = this.tasks.get(itemPosition).getTask();
+
+        menu.setHeaderTitle(curTaskString);
+
+        MenuItem itemDelete = menu.findItem(R.id.menuItemDelete);
+        itemDelete.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                getTasks().remove(itemPosition);
+                getAdapter().notifyDataSetChanged();
                 return true;
             }
         });
+        if (curTaskString.startsWith(CALL)|| curTaskString.startsWith(CALL_CAP)){
+            MenuItem callItem = menu.findItem(R.id.menuItemCall);
+            callItem.setTitle(curTaskString);
+            callItem.setVisible(true);
+
+            MenuItem itemCall = menu.findItem(R.id.menuItemCall);
+            itemCall.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+                @Override
+                public boolean onMenuItemClick(MenuItem item) {
+                    Intent callIntent = new Intent(Intent.ACTION_CALL);
+                    String numberToDial = curTaskString.split("\\s")[1];
+                    callIntent.setData(Uri.parse("tel:" +numberToDial.trim()));
+                    callIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(callIntent);
+                    return true;
+                }
+            });
+
+        }
     }
 
 
@@ -88,9 +131,38 @@ public class TodolistManagerActivity extends ActionBarActivity {
     }
 
     private void onAddItem() {
-        _new_task = (EditText)findViewById(R.id.new_ask_EditText);
-        String task = _new_task.getText().toString();
-        _adapter.add(task);
-        _new_task.setText("");
+        Intent intent = new Intent(getApplicationContext(), AddNewTodoItemActivity.class);
+        startActivityForResult(intent, RESULT_FROM_ADD_ITEM);
+
+
     }
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data){
+        if(resultCode == RESULT_OK){
+            switch (requestCode){
+                case RESULT_FROM_ADD_ITEM:
+                    Date date = (Date)data.getSerializableExtra(DATE_KEY);
+                    Calendar calendar = Calendar.getInstance();
+                    calendar.setTime(date);
+                    int day, month, year;
+                    day = calendar.get(Calendar.DAY_OF_MONTH);
+                    month = calendar.get(Calendar.MONTH)+1;
+                    year = calendar.get(Calendar.YEAR);
+                    this.adapter.add(new Task(data.getStringExtra(TASK_KEY), day, month, year));
+            }
+        }
+    }
+    private ArrayList<Task> getTasks(){ return this.tasks; }
+
+    private MyArrayAdapter getAdapter(){ return this.adapter; }
 }
+/*
+ * TODO
+ * 1. change main activity view so it has 2 text views instead of one
+ * 2. set new activity window according to ex description
+ *  2.1 create dialog activity
+ *  2.2 create date picker
+ *  2.3 write 2 extras: task and date
+ *  2.4 set the result
+ * 3. in adapter - check date for each task and mark past due date tasks with red color
+ */

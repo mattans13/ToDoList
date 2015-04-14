@@ -6,5 +6,11 @@
     <string name="add_task">Add Task</string>
     <string name="ok_button">OK</string>
     <string name="cancel_button">Cancel</string>
-    <string name="delete_prefix">Delete: </string>
+    <string name="delete_prefix">Delete</string>
+    <string name="new_task">Enter a new task</string>
+    <string name="new_date">Enter due date</string>
+    <string name="title_activity_dialog">DialogActivity</string>
+    <string name="call_prefix_cap">Call </string>
+    <string name="call_prefix">call </string>
+    <string name="no_date">No due date</string>
 </resources>
