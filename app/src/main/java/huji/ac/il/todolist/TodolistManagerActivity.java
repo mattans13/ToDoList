@@ -1,5 +1,6 @@
 package huji.ac.il.todolist;
 
+import android.app.ListActivity;
 import android.content.Intent;
 import android.net.Uri;
 import android.support.v7.app.ActionBarActivity;
@@ -16,7 +17,7 @@ import java.util.Calendar;
 import java.util.Date;
 
 
-public class TodolistManagerActivity extends ActionBarActivity {
+public class TodolistManagerActivity extends ListActivity {
     protected ArrayList<Task> tasks;
     protected MyArrayAdapter adapter;
     protected ListView listView;
