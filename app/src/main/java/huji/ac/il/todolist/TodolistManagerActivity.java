@@ -1,5 +1,6 @@
 package huji.ac.il.todolist;
 
+import android.app.Activity;
 import android.app.ListActivity;
 import android.content.Intent;
 import android.net.Uri;
@@ -17,10 +18,11 @@ import java.util.Calendar;
 import java.util.Date;
 
 
-public class TodolistManagerActivity extends ListActivity {
+public class TodolistManagerActivity extends Activity {
     protected ArrayList<Task> tasks;
     protected MyArrayAdapter adapter;
     protected ListView listView;
+    protected TasksDB tasksDB;
     private final String TASK_KEY = "title";
     private final String DATE_KEY = "dueDate";
     private final String CALL = "call";
@@ -35,34 +37,12 @@ public class TodolistManagerActivity extends ListActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_todolist_manager);
 
-        this.tasks = new ArrayList<>();
+        this.tasksDB = new TasksDB(this);
+        this.tasks = tasksDB.getAllTasks();
         this.adapter = new MyArrayAdapter(this, this.tasks);
-        this.listView = (ListView)findViewById(R.id.listView);
+        this.listView = (ListView)findViewById(R.id.list);
         this.listView.setAdapter(this.adapter);
-//        this.listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-//            @Override
-//            public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
-//                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(TodolistManagerActivity.this);
-//
-//                String msg = tasks.get(position).getTask();
-//                alertDialogBuilder.setMessage(msg);
-//                alertDialogBuilder.setPositiveButton(R.string.ok_button, new DialogInterface.OnClickListener() {
-//                    @Override
-//                    public void onClick(DialogInterface dialog, int which) {
-//                        tasks.remove(position);
-//                        adapter.notifyDataSetChanged();
-//                    }
-//                });
-//                alertDialogBuilder.setNegativeButton(R.string.cancel_button, new DialogInterface.OnClickListener() {
-//                    @Override
-//                    public void onClick(DialogInterface dialog, int which) {
-//
-//                    }
-//                });
-//                alertDialogBuilder.show();
-//                return true;
-//            }
-//        });
+
         registerForContextMenu(this.listView);
     }
 
@@ -80,6 +60,7 @@ public class TodolistManagerActivity extends ListActivity {
         itemDelete.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
+                tasksDB.deleteTask(getTasks().get(itemPosition));
                 getTasks().remove(itemPosition);
                 getAdapter().notifyDataSetChanged();
                 return true;
@@ -134,9 +115,8 @@ public class TodolistManagerActivity extends ListActivity {
     private void onAddItem() {
         Intent intent = new Intent(getApplicationContext(), AddNewTodoItemActivity.class);
         startActivityForResult(intent, RESULT_FROM_ADD_ITEM);
-
-
     }
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data){
         if(resultCode == RESULT_OK){
@@ -149,7 +129,10 @@ public class TodolistManagerActivity extends ListActivity {
                     day = calendar.get(Calendar.DAY_OF_MONTH);
                     month = calendar.get(Calendar.MONTH)+1;
                     year = calendar.get(Calendar.YEAR);
-                    this.adapter.add(new Task(data.getStringExtra(TASK_KEY), day, month, year));
+                    Task task = new Task(data.getStringExtra(TASK_KEY), day, month, year);
+                    this.tasksDB.addTaskToDB(task);
+                    this.adapter.add(task);
+                    this.adapter.notifyDataSetChanged();
             }
         }
     }

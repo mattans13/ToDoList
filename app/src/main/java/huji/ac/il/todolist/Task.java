@@ -16,14 +16,19 @@ import java.util.Date;
 public class Task {
     private String task;
     private int day,month,year;
+    private long id;
 
     public Task(String task, int day, int month, int year){
         setTask(task);
         setDay(day);
         setMonth(month);
         setYear(year);
+        setId(0);
     }
 
+    public void setId(long id){
+        this.id = id;
+    }
 
     public void setDay(int day){ this.day = day;  }
 
@@ -51,6 +56,10 @@ public class Task {
         return year;
     }
 
+    public long getId(){
+        return this.id;
+    }
+
     @Override
     public String toString(){
         return getTask() + " " + getDateAsString();
@@ -62,16 +71,24 @@ public class Task {
 
     private String getDateAsStringForTaskOverdue(){return getDay()+1 + "/" + getMonth() + "/" + getYear();}
 
-    public boolean isTaskOverdue(){
+    public Date getDateAsDate(){
         DateFormat dateFormat = new SimpleDateFormat("dd/M/yyyy");
-        Calendar calendar = Calendar.getInstance();
+        Date taskDate = null;
         try {
-            Date taskDate = dateFormat.parse(this.getDateAsStringForTaskOverdue());
-            if(calendar.getTime().after(taskDate)){
-                return true;
-            }
-        } catch (ParseException e) {
+            taskDate = dateFormat.parse(this.getDateAsStringForTaskOverdue());
+        }
+        catch (ParseException e) {
             e.printStackTrace();
+        }
+        return taskDate;
+    }
+
+    public boolean isTaskOverdue(){
+        Date taskDate = getDateAsDate();
+        Calendar calendar = Calendar.getInstance();
+
+        if(calendar.getTime().after(taskDate)){
+            return true;
         }
         return false;
     }

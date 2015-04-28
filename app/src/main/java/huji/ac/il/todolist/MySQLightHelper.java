@@ -17,11 +17,11 @@ public class MySQLightHelper extends SQLiteOpenHelper {
 
     public static int DB_VERSION = 1;
 
-    private static String CREATE_DB = "create table" + TABLE_TASKS
-                                                     + "(" + COLUMN_ID
-                                                           + " integer primary key autoincrement, "
-                                                           + COLUMN_TITLE + " text not null "
-                                                           + COLUMN_DUE + " long not null);";
+    private static String CREATE_DB = "CREATE TABLE " + TABLE_TASKS +
+            " ( _id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+            COLUMN_TITLE + " TEXT, " +
+            COLUMN_DUE + " LONG)";
+
 
     public MySQLightHelper(Context context) {
         super(context, DB_NAME, null, DB_VERSION);

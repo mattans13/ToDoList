@@ -34,11 +34,7 @@
             </intent-filter>
 
         </activity>
-        <activity
-            android:name=".DialogActivity"
-            android:label="@string/title_activity_dialog" >
 
-        </activity>
 
     </application>
 
