@@ -60,8 +60,8 @@ public class TodolistManagerActivity extends Activity {
         itemDelete.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                tasksDB.deleteTask(getTasks().get(itemPosition));
                 getTasks().remove(itemPosition);
+                tasksDB.deleteTask(getTasks().get(itemPosition));
                 getAdapter().notifyDataSetChanged();
                 return true;
             }

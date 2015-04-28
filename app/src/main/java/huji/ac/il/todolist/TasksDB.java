@@ -42,7 +42,10 @@ public class TasksDB {
     }
 
     public void deleteTask(Task task){
-        database.delete(MySQLightHelper.TABLE_TASKS, MySQLightHelper.COLUMN_ID+"="+task.getId(),null);
+        open();
+        database.delete(MySQLightHelper.TABLE_TASKS, MySQLightHelper.COLUMN_ID + " = ?",
+                new String[] {String.valueOf(task.getId())});
+        close();
     }
 
     public ArrayList<Task> getAllTasks(){
